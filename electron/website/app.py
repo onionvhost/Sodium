@@ -6,8 +6,11 @@ import uvicorn
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
 
+from traffic import TrafficMiddleware, traffic_tracker
+
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory="website/static"), name="static")
+app.add_middleware(TrafficMiddleware)
 
 templates = Jinja2Templates(directory="website/templates")
 executor = ThreadPoolExecutor()
@@ -17,7 +20,33 @@ async def render_template(template_name: str, context: dict):
     executor, lambda: templates.get_template(template_name).render(context)
   )
 
+@app.get("/traffic")
+def get_traffic(request: Request):
+    token = request.headers.get("Authorization")
+    if token != "your_secret_token":
+        return Response(status_code=404, content="not found")
+
+    timestamp, incoming, outgoing = traffic_tracker.get_current()
+    return {
+        "timestamp": timestamp,
+        "incoming": incoming,
+        "outgoing": outgoing,
+    }
+
 @app.get("/")
 async def read_root(request: Request):
     content = await render_template('index.html', {"request": request})
     return HTMLResponse(content=content)
+
+if __name__ == "__main__":
+    import os
+    import sys
+    import uvicorn
+
+    current_file = os.path.abspath(__file__)
+    current_dir = os.path.dirname(current_file)
+    sys.path.insert(0, os.path.dirname(current_dir))
+
+    from website.app import app
+
+    uvicorn.run(app, host="127.0.0.1", port=8080, reload=False)

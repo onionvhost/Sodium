@@ -14,7 +14,7 @@
 
   <section id="error" style="display: none;">
     <h1>Error</h1>
-    <p>Failed to start the Onion Server Management Software. Please check the console for details.</p>
+    <p>Something went wrong...</p>
   </section>
 
   <section id="setup" style="display: none;">
@@ -57,31 +57,31 @@
       </div>
     </nav>
     <section class="dash-grid-4">
-      <div class="dash-item item-online">
+      <a href="javascript:show('modalStart')" id="dash-status" class="dash-item item-online">
         <div>
-          <b>Online</b>
+          <b id="status-title">Online</b>
           <p>Website Status</p>
         </div>
         <div class="dash-item-bg">
-          <div class="online"></div>
+          <div id="status-circle" class="online pulse"></div>
         </div>
-      </div>
+      </a>
       <div class="dash-item">
         <div>
-          <b>500</b>
+          <b id="users-title">0</b>
           <p>Website Users</p>
         </div>
         <canvas id="usersChart" class="chart"></canvas>
       </div>
       <div class="dash-item">
         <div>
-          <b>0</b>
+          <b id="messages-title">0</b>
           <p>Messages sent</p>
         </div>
       </div>
       <div class="dash-item">
         <div>
-          <b>0</b>
+          <b id="visitors-title">0</b>
           <p>Website Visitors</p>
         </div>
       </div>
@@ -90,16 +90,26 @@
       <div class="dash-item">
         <div>
           <b>0</b>
-          <p>MB/out</p>
+          <p>KB/in</p>
         </div>
+        <canvas id="trafficInChart" class="chart"></canvas>
       </div>
       <div class="dash-item">
         <div>
           <b>0</b>
-          <p>MB/in</p>
+          <p>KB/out</p>
         </div>
+        <canvas id="trafficOutChart" class="chart"></canvas>
       </div>
     </section>
+    <div style="display: hidden;" id="modalStart" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="hide('modalStart')">&times;</span>
+        <h2>Start Website</h2>
+        <p>Do you want to start the website now?</p>
+        <button onclick="runWebsite()">Start</button>
+      </div>
+    </div>
   </section>
 
   <script>
@@ -123,18 +133,35 @@
       throw new Error("FastAPI backend did not start.");
     }
 
-    async function waitForWebsite(retries = 20, delay = 500) {
+    async function waitForWebsite(retries = 2, delay = 500) {
+      let status = false;
+      let data = {};
       for (let i = 0; i < retries; i++) {
         try {
           const res = await fetch('http://127.0.0.1:8080/');
-          if (res.ok) return await res.json();
+          if (res.ok) {
+            status = true
+          };
         } catch (err) {
           // API not ready yet
         }
         await new Promise(resolve => setTimeout(resolve, delay));
       }
-      throw new Error("Website is not running.");
-    }
+      try {
+        const res = await fetch('http://127.0.0.1:8081/load');
+        if (res.ok) {data = await res.json();};
+      } catch (err) {
+        // API not ready yet
+      }
+      document.getElementById('status-title').textContent = status ? 'Online' : 'Offline';
+      document.getElementById('status-circle').className = status ? 'online pulse' : 'offline pulse';
+      document.getElementById('dash-status').className = status ? 'dash-item item-online' : 'dash-item item-offline';
+      document.getElementById('users-title').textContent = data.users || 0;
+      document.getElementById('messages-title').textContent = data.messages || 0;
+      document.getElementById('visitors-title').textContent = data.visitors || 0;
+
+      return JSON.stringify({"online": status, "users": data.users, "messages": data.messages, "visitors": data.visitors});
+    };
 
     window.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -142,8 +169,11 @@
         if (response != "Started") throw new Error("Failed to execute Python script.");
         console.log('Python script executed:', response);
         const data = await waitForAPI();
+        const resp = await window.electronAPI.runPython('management/func/main.py');
+        if (response != "Started") throw new Error("Failed to execute Python script.");
+        console.log('Python script executed:', response);
         hide('start');
-        data.hasUser ? show('dashboard') : show('setup');
+        data.hasUser ? show('login') : show('setup');
       } catch (error) {
         hide('start');
         show('error');
@@ -179,13 +209,19 @@
 
     async function loadDashboard() {
       try {
-        let status = false;
         const response = await waitForWebsite();
-        if (response != "Started") 
-        console.log('Website loaded:', response);
-        show('dashboard');
+        if (response) {
+          console.log('Dashboard loaded:', response);
+          hide('start');
+          show('dashboard');
+          return;
+        } else {
+          throw new Error("Website is not Online.");
+        }
       } catch (error) {
         console.error('Error loading dashboard:', error);
+        hide('start');
+        show('error');
       }
     }
 
@@ -206,6 +242,7 @@
         });
         if (response.ok) {
           hide('login');
+          show('start');
           loadDashboard();
         } else {
           throw new Error('Failed to login');
@@ -223,11 +260,54 @@
       } catch (error) {
         console.error('Error starting website:', error);
       }
+      hide('modalStart');
+      document.getElementById('status-title').textContent = 'Online';
+      document.getElementById('status-circle').className = 'online pulse';
+      document.getElementById('dash-status').className = 'dash-item item-online';
+      setInterval(async () => {await pollTraffic()}, 1000);
+    };
+
+    async function pollTraffic() {
+      try {
+        const response = await fetch('http://127.0.0.1:8080/traffic', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'your_secret_token'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const now = new Date().toLocaleTimeString();
+          if (trafficsInChart.data.labels.length > 60) {
+            trafficsInChart.data.labels.shift();
+            trafficsInChart.data.datasets[0].data.shift();
+          }
+          if (trafficsOutChart.data.labels.length > 60) {
+            trafficsOutChart.data.labels.shift();
+            trafficsOutChart.data.datasets[0].data.shift();
+          }
+
+          trafficsInChart.data.datasets[0].data.push(data.incoming);
+          trafficsInChart.data.labels.push(now);
+          
+          trafficsOutChart.data.labels.push(now);
+          trafficsOutChart.data.datasets[0].data.push(data.outgoing);
+          
+          trafficsInChart.update();
+          trafficsOutChart.update();
+        } else {
+          console.error('Failed to fetch traffic data:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching traffic data:', error);
+      }
     };
   </script>
 
   <script>
     const userChart = document.getElementById('usersChart').getContext('2d');
+    const trafficInChart = document.getElementById('trafficInChart').getContext('2d');
+    const trafficOutChart = document.getElementById('trafficOutChart').getContext('2d');
     const usersCart = new Chart(userChart, {
       type: 'line',
       data: {
@@ -250,7 +330,7 @@
             display: false
           },
           tooltip: {
-            enabled: false  // <-- disables the tooltip
+            enabled: false
           }
         },
         interaction: {
@@ -269,8 +349,106 @@
             title: {
               display: false
             },
-            suggestedMin: 10,
+            suggestedMin: 5,
             suggestedMax: 50
+          }
+        }
+      }
+    });
+
+    const trafficsInChart = new Chart(trafficInChart, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Incoming Traffic',
+          data: [],
+          borderColor: 'rgb(122, 174, 204, 1)',
+          backgroundColor: 'rgb(122, 174, 204, 0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 0
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: true
+          }
+        },
+        interaction: {
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: false,
+            title: {
+              display: false
+            }
+          },
+          y: {
+            display: false,
+            beginAtZero: false,
+            title: {
+              display: false
+            },
+            suggestedMin: 5,
+            suggestedMax: 1000
+          }
+        }
+      }
+    });
+
+    const trafficsOutChart = new Chart(trafficOutChart, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Outgoing Traffic',
+          data: [],
+          borderColor: 'rgb(122, 174, 204, 1)',
+          backgroundColor: 'rgb(122, 174, 204, 0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 0
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: true
+          }
+        },
+        interaction: {
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: false,
+            title: {
+              display: false
+            }
+          },
+          y: {
+            display: false,
+            beginAtZero: false,
+            title: {
+              display: false
+            },
+            suggestedMin: 5,
+            suggestedMax: 1000
           }
         }
       }

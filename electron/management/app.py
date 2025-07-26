@@ -7,6 +7,7 @@ import asyncio
 import sys
 
 from func.config import configTable, checkConfig, addSuperuser, checkSuperuser
+from func.stats import statsTable, checkStats
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -42,6 +43,14 @@ async def login(request: Request):
     else:
         return JSONResponse({"error": "Invalid username or password."}, status_code=401)
     
+@app.get("/load")
+async def load(request: Request):
+    stats = await checkStats()
+    if stats:
+        return JSONResponse({"stats": stats}, status_code=200)
+    else:
+        return JSONResponse({"error": "No stats found."}, status_code=404)
+    
 @app.get("/run")
 async def run(request: Request):
     return
@@ -58,5 +67,6 @@ if __name__ == "__main__":
     from management.app import app
 
     asyncio.run(configTable())
+    asyncio.run(statsTable())
 
     uvicorn.run(app, host="127.0.0.1", port=8081, reload=False)

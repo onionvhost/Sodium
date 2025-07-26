@@ -15,7 +15,7 @@ body {
     font-family: 'Outfit', system-ui, sans-serif;
 }
 
-#start, #login, #setup{
+#start, #login, #setup, #error{
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -161,7 +161,9 @@ body {
     padding: 1rem;
     border: 2px solid #34303d;
     border-radius: 0.5rem;
+    color: #f5f5f5;
     background: #24202daa;
+    text-decoration: none;
     box-shadow: 0 0 0 #34303d, inset 0 0 1rem #34303d;
     transition: 0.3s;
     overflow: hidden;
@@ -223,6 +225,14 @@ body {
     width: 21.75rem !important;
 }
 
+.dash-grid-2 .chart {
+    width: 40rem !important;
+}
+
+/* --- Modal --- */
+
+/* --- Animations --- */
+
 .spin {
     animation: spin 2s linear infinite;
 }
@@ -233,5 +243,24 @@ body {
     }
     100% {
         transform: rotate(360deg);
+    }
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
