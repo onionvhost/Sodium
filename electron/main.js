@@ -1,0 +1,63 @@
+const { app, BrowserWindow, ipcMain } = require('electron');
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+function createWindow () {
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      nodeIntegration: false
+    }
+  });
+
+  //win.setMenu(null);
+  win.loadFile('templates/index.html');
+}
+
+app.whenReady().then(() => {
+  createWindow();
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
+ipcMain.handle('main', async (_, scriptPath) => {
+  try {
+    const fullScriptPath = path.resolve(__dirname, scriptPath);
+
+    if (!fs.existsSync(fullScriptPath)) {
+      throw new Error(`Script not found at path: ${fullScriptPath}`);
+    }
+
+    console.log('Running Python script at:', fullScriptPath);
+
+    const pythonProcess = spawn('python', [fullScriptPath], {
+      cwd: path.resolve(__dirname),
+      stdio: 'pipe'
+    });
+
+    pythonProcess.stdout.on('data', (data) => {
+      console.log(`[PYTHON STDOUT]: ${data.toString()}`);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      console.error(`[PYTHON STDERR]: ${data.toString()}`);
+    });
+
+    pythonProcess.on('error', (err) => {
+      console.error(`Failed to start Python process: ${err}`);
+    });
+
+    return 'Started';
+  } catch (err) {
+    console.error('Error starting Python script:', err);
+    return `Failed to start: ${err.message}`;
+  }
+});

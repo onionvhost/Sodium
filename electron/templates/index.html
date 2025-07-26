@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Onion Server Setup</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <section id="start">
+    <img src="icons/spinner.svg" class="spin" alt="Loading...">
+    <h1>Starting Onion Server Management Software...</h1>
+  </section>
+
+  <section id="error" style="display: none;">
+    <h1>Error</h1>
+    <p>Failed to start the Onion Server Management Software. Please check the console for details.</p>
+  </section>
+
+  <section id="setup" style="display: none;">
+    <h1>Setup</h1>
+    <p>We've detected that it's the first time you run the software so please create a superuser account.</p>
+    <form id="setup-form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+      
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      
+      <button type="submit">Create User</button>
+    </form>
+  </section>
+
+  <section id="login" style="display: none;">
+    <h1>Login</h1>
+    <form id="login-form">
+      <label for="login-username">Username:</label>
+      <input type="text" id="login-username" name="username" required>
+      
+      <label for="login-password">Password:</label>
+      <input type="password" id="login-password" name="password" required>
+      
+      <button type="submit">Login</button>
+    </form>
+  </section>
+
+  <section id="dashboard" style="display: none;">
+    <h1>Onion Server Management Dashboard</h1>
+    <p>Welcome to the Onion Server Management Dashboard!</p>
+  </section>
+
+  <script>
+    function show(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+    function hide(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    async function waitForAPI(retries = 20, delay = 500) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const res = await fetch('http://127.0.0.1:8081/startup');
+          if (res.ok) return await res.json();
+        } catch (err) {
+          // API not ready yet
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      throw new Error("FastAPI backend did not start.");
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await window.electronAPI.runPython('management/app.py');
+        if (response != "Started") throw new Error("Failed to execute Python script.");
+        console.log('Python script executed:', response);
+        const data = await waitForAPI();
+        hide('start');
+        data.hasUser ? show('login') : show('setup');
+      } catch (error) {
+        hide('start');
+        show('error');
+        console.error('Error starting management software:', error);
+      }
+    });
+
+    document.getElementById('setup-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      try {
+        const response = await fetch('http://127.0.0.1:8081/setup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: formData.get('username'),
+            password: formData.get('password')
+          })
+        });
+        if (response.ok) {
+          hide('setup');
+          show('login');
+        } else {
+          throw new Error('Failed to create user');
+        }
+      } catch (error) {
+        console.error('Error during setup:', error);
+      }
+    });
+
+     document.getElementById('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      try {
+        const response = await fetch('http://127.0.0.1:8081/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: formData.get('username'),
+            password: formData.get('password')
+          })
+        });
+        if (response.ok) {
+          hide('login');
+          show('dashboard');
+        } else {
+          throw new Error('Failed to login');
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+      }
+    });
+  </script>
+</body>
+</html>
