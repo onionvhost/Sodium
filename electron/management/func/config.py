@@ -1,7 +1,7 @@
 import aiosqlite
 
 async def getdb():
-    conn = await aiosqlite.connect('management/db/config.db')
+    conn = await aiosqlite.connect('db/config.db')
     await conn.execute("PRAGMA journal_mode = WAL")
     await conn.execute("PRAGMA temp_store = MEMORY")
     return conn

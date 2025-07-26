@@ -135,6 +135,16 @@
         console.error('Error during login:', error);
       }
     });
+
+    async function runWebsite() {
+      try {
+        const response = await window.electronAPI.runWebsite('website/app.py');
+        if (response != "Started") throw new Error("Failed to execute website script.");
+        console.log('Website script executed:', response);
+      } catch (error) {
+        console.error('Error starting website:', error);
+      }
+    };
   </script>
 </body>
 </html>

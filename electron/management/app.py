@@ -42,6 +42,9 @@ async def login(request: Request):
     else:
         return JSONResponse({"error": "Invalid username or password."}, status_code=401)
     
+@app.get("/run")
+async def run(request: Request):
+    return
 
 if __name__ == "__main__":
     import os
