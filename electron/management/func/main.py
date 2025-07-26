@@ -13,7 +13,7 @@ HIDDEN_SERVICE_DIR = r"C:\tor\hidden_service"
 TORRC_PATH = os.path.join(TOR_DIR, "torrc")
 HOSTNAME_FILE = os.path.join(HIDDEN_SERVICE_DIR, "hostname")
 ONION_OUT = "onion_domain.txt"
-LOCAL_PORT = 80
+LOCAL_PORT = 8080
 
 def purple(text):
     return f"\033[95m{text}\033[0m"

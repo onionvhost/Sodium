@@ -2,3 +2,7 @@ electron/node_modules
 onion_domain.txt
 build.txt
 /electron/db
+/electron/management/__pycache__
+/electron/management/func/__pycache__
+/electron/website/__pycache__
+/electron/website/func/__pycache__

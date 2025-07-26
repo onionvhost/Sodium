@@ -15,13 +15,212 @@ body {
     font-family: 'Outfit', system-ui, sans-serif;
 }
 
-#start {
+#start, #login, #setup{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 90vh;
     width: 100%;
+}
+
+#dashboard {
+    flex-direction: column;
+    width: 100%;
+}
+
+/* --- login and first setup --- */
+
+#login-form, #setup-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20rem;
+    height: 12rem;
+    padding: 2rem;
+    border: 2px solid #34303d;
+    border-radius: 0.5rem;
+    background: #24202daa;
+    box-shadow: 0 0 3rem #7aaecc50;
+}
+
+#setup-form {
+    width: 25rem;
+    height: 15rem;
+}
+
+#setup-form p {
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    text-align: center;
+    color: #f5f5f5;
+}
+
+.input-wrapper {
+    position: relative;
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.input-wrapper input {
+    width: calc(100% - 1rem);
+    padding: 0.5rem;
+    border: 1px solid #34303d;
+    border-radius: 0.25rem;
+    background: #24202d;
+    outline: none;
+    color: #f5f5f5;
+    font-size: 1rem;
+    font-family: 'Outfit', system-ui, sans-serif;
+    transition: 0.3s ease-in-out;
+}
+
+.input-wrapper input:focus {
+    padding-top: 1rem;
+}
+
+.input-wrapper label {
+  position: absolute;
+  top: -0.6rem;
+  left: 0.5rem;
+  padding: 0 0.25rem;
+  color: #f5f5f5bb;
+  background: #24202d;
+  border: 1px solid #34303d;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+#login-form button, #setup-form button {
+    width: 100%;
+    margin-top: auto;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: #7aaecc;
+    color: #f5f5f5;
+    font-size: 1rem;
+    font-family: 'Outfit', system-ui, sans-serif;
+    cursor: pointer;
+}
+
+/* --- Dashboard --- */
+
+#dashboard nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5rem 2rem;
+    background: #24202d;
+    box-shadow: 0 0 0.5rem #7aaecc25;
+    z-index: 999;
+}
+
+#dashboard nav div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#dashboard nav img {
+    width: 2rem;
+    height: 2rem;
+}
+
+.dash-grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    margin: 0 2rem;
+    margin-top: 7rem;
+    gap: 1rem;
+}
+.dash-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    margin: 0 2rem;
+    margin-top: 1rem;
+    gap: 1rem;
+}
+
+.dash-item {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 10rem;
+    padding: 1rem;
+    border: 2px solid #34303d;
+    border-radius: 0.5rem;
+    background: #24202daa;
+    box-shadow: 0 0 0 #34303d, inset 0 0 1rem #34303d;
+    transition: 0.3s;
+    overflow: hidden;
+}
+.dash-item:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 1rem #34303d, inset 0 0 1rem #44404dbb;
+}
+
+.dash-item b {
+    font-size: 1.5rem;
+}
+.dash-item p {
+    padding: 0 !important;
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.item-offline {
+    border: 2px solid #fc6060;
+    background: #fc606050;
+    box-shadow: 0 0 1rem #fc6060, inset 0 0 1rem #fc6060aa;
+}
+.item-offline:hover {
+    box-shadow: 0 0 1rem #fc6060, inset 0 0 1rem #fc6060 !important;
+}
+
+.item-online {
+    border: 2px solid #7fcc70;
+    background: #7fcc7050;
+    box-shadow: 0 0 1rem #7fcc70, inset 0 0 1rem #7fcc70aa;
+}
+.item-online:hover {
+    box-shadow: 0 0 1rem #7fcc70, inset 0 0 1rem #7fcc70 !important;
+}
+
+.offline, .online {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1rem;
+    height: 1rem;
+    background: #fc6060;
+    box-shadow: 0 0 0 0.5rem #fc6060aa;
+    border-radius: 50%;
+}
+
+.online {
+    background: #7fcc70;
+    box-shadow: 0 0 0 0.5rem #7fcc70aa;
+}
+
+.chart {
+    position: absolute;
+    bottom: -0.5rem;
+    left: -0.5rem;
+    right: -10rem;
+    width: 21.75rem !important;
 }
 
 .spin {

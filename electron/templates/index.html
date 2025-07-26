@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <title>Onion Server Setup</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <section id="start">
     <img src="icons/spinner.svg" class="spin" alt="Loading...">
-    <h1>Starting Onion Server Management Software...</h1>
+    <h1>Loading...</h1>
   </section>
 
   <section id="error" style="display: none;">
@@ -17,40 +18,93 @@
   </section>
 
   <section id="setup" style="display: none;">
-    <h1>Setup</h1>
-    <p>We've detected that it's the first time you run the software so please create a superuser account.</p>
     <form id="setup-form">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required>
+      <div class="input-wrapper">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
       
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
+      <div class="input-wrapper">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
       
+      <p>We've detected that it's the first time you run the software so please create a superuser account.</p>
       <button type="submit">Create User</button>
     </form>
   </section>
 
   <section id="login" style="display: none;">
-    <h1>Login</h1>
     <form id="login-form">
-      <label for="login-username">Username:</label>
-      <input type="text" id="login-username" name="username" required>
-      
-      <label for="login-password">Password:</label>
-      <input type="password" id="login-password" name="password" required>
+      <div class="input-wrapper">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" name="username" required>
+      </div>
+      <div class="input-wrapper">
+        <label for="login-password">Password:</label>
+        <input type="password" id="login-password" name="password" required>
+      </div>
       
       <button type="submit">Login</button>
     </form>
   </section>
 
   <section id="dashboard" style="display: none;">
-    <h1>Onion Server Management Dashboard</h1>
-    <p>Welcome to the Onion Server Management Dashboard!</p>
+    <nav>
+      <div>
+        <img src="img/sodium.png" alt="Sodium Logo">
+        <h1>Sodium Server Management</h1>
+      </div>
+    </nav>
+    <section class="dash-grid-4">
+      <div class="dash-item item-online">
+        <div>
+          <b>Online</b>
+          <p>Website Status</p>
+        </div>
+        <div class="dash-item-bg">
+          <div class="online"></div>
+        </div>
+      </div>
+      <div class="dash-item">
+        <div>
+          <b>500</b>
+          <p>Website Users</p>
+        </div>
+        <canvas id="usersChart" class="chart"></canvas>
+      </div>
+      <div class="dash-item">
+        <div>
+          <b>0</b>
+          <p>Messages sent</p>
+        </div>
+      </div>
+      <div class="dash-item">
+        <div>
+          <b>0</b>
+          <p>Website Visitors</p>
+        </div>
+      </div>
+    </section>
+    <section class="dash-grid-2">
+      <div class="dash-item">
+        <div>
+          <b>0</b>
+          <p>MB/out</p>
+        </div>
+      </div>
+      <div class="dash-item">
+        <div>
+          <b>0</b>
+          <p>MB/in</p>
+        </div>
+      </div>
+    </section>
   </section>
 
   <script>
     function show(id) {
-      document.getElementById(id).style.display = 'block';
+      document.getElementById(id).style.display = 'flex';
     }
     function hide(id) {
       document.getElementById(id).style.display = 'none';
@@ -69,6 +123,19 @@
       throw new Error("FastAPI backend did not start.");
     }
 
+    async function waitForWebsite(retries = 20, delay = 500) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const res = await fetch('http://127.0.0.1:8080/');
+          if (res.ok) return await res.json();
+        } catch (err) {
+          // API not ready yet
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      throw new Error("Website is not running.");
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
       try {
         const response = await window.electronAPI.runPython('management/app.py');
@@ -76,7 +143,7 @@
         console.log('Python script executed:', response);
         const data = await waitForAPI();
         hide('start');
-        data.hasUser ? show('login') : show('setup');
+        data.hasUser ? show('dashboard') : show('setup');
       } catch (error) {
         hide('start');
         show('error');
@@ -110,6 +177,18 @@
       }
     });
 
+    async function loadDashboard() {
+      try {
+        let status = false;
+        const response = await waitForWebsite();
+        if (response != "Started") 
+        console.log('Website loaded:', response);
+        show('dashboard');
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
      document.getElementById('login-form').addEventListener('submit', async (event) => {
       event.preventDefault();
       const form = event.target;
@@ -127,7 +206,7 @@
         });
         if (response.ok) {
           hide('login');
-          show('dashboard');
+          loadDashboard();
         } else {
           throw new Error('Failed to login');
         }
@@ -145,6 +224,57 @@
         console.error('Error starting website:', error);
       }
     };
+  </script>
+
+  <script>
+    const userChart = document.getElementById('usersChart').getContext('2d');
+    const usersCart = new Chart(userChart, {
+      type: 'line',
+      data: {
+        labels: ['5 days ago', '4 days ago', '3 days ago', '2 days ago', 'yesterday', 'today'],
+        datasets: [{
+          data: [0, 12, 90, 32, 87, 298],
+          borderColor: 'rgb(122, 174, 204, 1)',
+          backgroundColor: 'rgb(122, 174, 204, 0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 0
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false  // <-- disables the tooltip
+          }
+        },
+        interaction: {
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: false,
+            title: {
+              display: false
+            }
+          },
+          y: {
+            display: false,
+            beginAtZero: false,
+            title: {
+              display: false
+            },
+            suggestedMin: 10,
+            suggestedMax: 50
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>
