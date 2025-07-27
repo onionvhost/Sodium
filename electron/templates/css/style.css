@@ -231,6 +231,62 @@ body {
 
 /* --- Modal --- */
 
+#modalStart {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    width: 20rem;
+    height: max-content;
+    padding: 2rem;
+    border: 2px solid #34303d;
+    border-radius: 0.5rem;
+    background: #24202d;
+    box-shadow: 0 0 3rem #7aaecc50;
+}
+
+.modal img {
+    width: 1rem;
+    height: 1rem;
+    align-self: flex-end;
+    cursor: pointer;
+}
+
+.modal button {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: #7aaecc;
+    color: #f5f5f5;
+    font-size: 1rem;
+    font-family: 'Outfit', system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.moadl b {font-size: 1.5rem;}
+
+.modal p {
+    margin: 0;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    color: #f5f5f5;
+}
+
 /* --- Animations --- */
 
 .spin {

@@ -38,6 +38,30 @@ async def read_root(request: Request):
     content = await render_template('index.html', {"request": request})
     return HTMLResponse(content=content)
 
+@app.get("/app")
+async def initiate(request: Request):
+    session = request.cookies.get("session")
+    if not session:
+        return RedirectResponse(url="/login")
+    content = await render_template('app.html', {"request": request})
+    return HTMLResponse(content=content)
+
+@app.get("/login")
+async def login(request: Request):
+    content = await render_template('login.html', {"request": request})
+    return HTMLResponse(content=content)
+
+@app.post("/login")
+async def login_post(request: Request):
+    data = await request.json()
+    username = data.get("username")
+    password = data.get("password")
+    
+    if not username or not password:
+        return JSONResponse({"error": "Username and password are required."}, status_code=400)
+    else:
+        return JSONResponse({"error": "Invalid credentials."}, status_code=401)
+
 if __name__ == "__main__":
     import os
     import sys

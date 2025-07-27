@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Onion Server Setup</title>
+  <title>Sodium Server Management</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -102,20 +102,54 @@
         <canvas id="trafficOutChart" class="chart"></canvas>
       </div>
     </section>
-    <div style="display: hidden;" id="modalStart" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="hide('modalStart')">&times;</span>
-        <h2>Start Website</h2>
+
+    <div id="modalStart">
+      <div class="modal">
+        <img onclick="hide('modalStart')" src="icons/cross.svg" alt="Close Modal">
+        <b class="modal-title">Start Website</b>
         <p>Do you want to start the website now?</p>
-        <button onclick="runWebsite()">Start</button>
+        <button>Start</button>
       </div>
     </div>
   </section>
 
   <script>
+    let status = false;
+    let trafficPollInterval = null;
+
     function show(id) {
       document.getElementById(id).style.display = 'flex';
+      if (id === 'modalStart') {
+        if (status) {
+          document.querySelector('.modal-title').textContent = 'End Website Process';
+          document.querySelector('.modal p').textContent = 'Do you want to end the website process now? This will stop the website and you will not be able to access it until you start it again.';
+          document.querySelector('.modal button').textContent = 'End Process';
+        } else {
+          document.querySelector('.modal-title').textContent = 'Start Website Process';
+          document.querySelector('.modal p').textContent = 'Do you want to start the website now?';
+          document.querySelector('.modal button').textContent = 'Start Process';
+        }
+      }
     }
+
+    document.querySelector('.modal button').addEventListener('click', () => {
+      if (status) {
+        window.electronAPI.endWebsite();
+        document.getElementById('status-title').textContent = 'Offline';
+        document.getElementById('status-circle').className = 'offline pulse';
+        document.getElementById('dash-status').className = 'dash-item item-offline';
+        status = false;
+        if (trafficPollInterval) {
+          clearInterval(trafficPollInterval);
+          trafficPollInterval = null;
+        }
+      } else {
+        runWebsite();
+        status = true;
+      }
+      hide('modalStart');
+    });
+
     function hide(id) {
       document.getElementById(id).style.display = 'none';
     }
@@ -134,7 +168,6 @@
     }
 
     async function waitForWebsite(retries = 2, delay = 500) {
-      let status = false;
       let data = {};
       for (let i = 0; i < retries; i++) {
         try {
@@ -264,7 +297,7 @@
       document.getElementById('status-title').textContent = 'Online';
       document.getElementById('status-circle').className = 'online pulse';
       document.getElementById('dash-status').className = 'dash-item item-online';
-      setInterval(async () => {await pollTraffic()}, 1000);
+      trafficPollInterval = setInterval(async () => {await pollTraffic()}, 1000);
     };
 
     async function pollTraffic() {

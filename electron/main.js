@@ -3,6 +3,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+let runProcess = null;
+
 function createWindow () {
   const win = new BrowserWindow({
     width: 1300,
@@ -86,7 +88,7 @@ ipcMain.handle('run', async (_, scriptPath) => {
 
     console.log('Running Python script at:', fullScriptPath);
 
-    const pythonProcess = spawn('python', [fullScriptPath], {
+    runProcess = spawn('python', [fullScriptPath], {
       cwd: path.resolve(__dirname),
       stdio: 'pipe'
     });
@@ -94,5 +96,21 @@ ipcMain.handle('run', async (_, scriptPath) => {
   } catch (err) {
     console.error('Error starting Python script:', err);
     return `Failed to start: ${err.message}`;
+  }
+});
+
+ipcMain.handle('end', async () => {
+  try {
+    if (runProcess) {
+      runProcess.kill(); // Send SIGTERM
+      runProcess = null;
+      console.log('Python process terminated.');
+      return 'Stopped';
+    } else {
+      return 'No process running';
+    }
+  } catch (err) {
+    console.error('Error stopping Python script:', err);
+    return `Failed to stop: ${err.message}`;
   }
 });

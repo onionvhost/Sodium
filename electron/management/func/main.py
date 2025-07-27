@@ -1,4 +1,6 @@
 import os
+import shutil
+import sys
 import time
 import subprocess
 
@@ -65,18 +67,22 @@ def stop_tor(proc):
 
 if __name__ == "__main__":
     if not os.path.exists(TOR_EXE):
-        print(red("[-] Tor nicht gefunden unter C:\\tor\\tor"))
-        exit(1)
+        print(red("[-] Tor nicht gefunden unter C:\\tor\\tor, versuche zu kopieren..."))
+        shutil.copytree(TEMPLATE_TOR_DIR, TOR_DIR)
+        if not os.path.exists(TOR_EXE):
+            print(red("[-] Tor konnte nicht gefunden oder kopiert werden."))
+            exit(1)
 
     create_hidden_service_dir()
     create_torrc()
 
     if os.path.exists(ONION_OUT):
         print(green("[*] onion_domain.txt existiert bereits. nichts zu tun."))
-        exit(0)
 
     tor_proc = start_tor()
     try:
         wait_for_onion()
+        while True:
+            time.sleep(1)
     finally:
         stop_tor(tor_proc)
