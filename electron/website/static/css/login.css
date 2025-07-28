@@ -1,0 +1,114 @@
+@font-face {
+    font-family: 'Outfit';
+    src: url(fonts/OutfitRegular.ttf) format('truetype');
+}
+
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+    margin: 0;
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: #13101d;
+    color: #f5f5f5;
+}
+
+.login {
+    display: flex;
+    flex-direction: row;
+    background: #24202daa;
+    border: 1px solid #34303d;
+    border-radius: 1rem;
+}
+
+.side {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20rem;
+    height: 50vh;
+}
+
+.login img {
+    width: 10rem;
+    height: 10rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 25rem;
+    margin: 0;
+    padding: 2rem;
+    background: #24202daa;
+    border-radius: 0 1rem 1rem 0;
+}
+
+.input-wrapper {
+    position: relative;
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #34303d;
+    border-radius: 0.25rem;
+    background: #24202d;
+    outline: none;
+    color: #f5f5f5;
+    font-size: 1rem;
+    font-family: 'Outfit', system-ui, sans-serif;
+    transition: 0.3s ease-in-out;
+}
+
+.input-wrapper input:focus {
+    padding-top: 1rem;
+}
+
+.input-wrapper label {
+  position: absolute;
+  top: -0.6rem;
+  left: 0.5rem;
+  padding: 0 0.25rem;
+  color: #f5f5f5bb;
+  background: #24202d;
+  border: 1px solid #34303d;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+form button {
+    width: 100%;
+    margin-top: auto;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: #7aaecc;
+    color: #f5f5f5;
+    font-size: 1rem;
+    font-family: 'Outfit', system-ui, sans-serif;
+    cursor: pointer;
+}
+
+hr {
+    width: 100%;
+    border: 1px solid #34303d;
+    border-radius: 0.5rem;
+}
+
+form a {
+    color: #f5f5f5;
+    text-decoration: none;
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}

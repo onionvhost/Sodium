@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sign up | Sodium</title>
+        <link rel="icon" href="static/img/sodium.png">
+        <link rel="stylesheet" href="static/css/login.css">
+    </head>
+    <body>
+        <div class="login">
+            <div class="side">
+                <img src="static/img/sodium.png">
+            </div>
+            <form action="/signup" method="POST">
+                <h1>Sign up to Sodium</h1>
+                <div class="input-wrapper">
+                    <label for="username">Username</label>
+                    <input name="username" id="username">
+                </div>
+                <div class="input-wrapper">
+                    <label for="password">Password</label>
+                    <input name="password" type="password" id="password">
+                </div>
+                <button>Sign up</button>
+                <hr>
+                <a href="/login">Log in</a>
+            </form>
+        </div>
+    </body>
+</html>

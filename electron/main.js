@@ -92,6 +92,17 @@ ipcMain.handle('run', async (_, scriptPath) => {
       cwd: path.resolve(__dirname),
       stdio: 'pipe'
     });
+
+    runProcess.stdout.on('data', (data) => {
+      console.log(`[SETUP STDOUT]: ${data.toString()}`);
+    });
+    runProcess.stderr.on('data', (data) => {
+      console.error(`[SETUP STDERR]: ${data.toString()}`);
+    });
+    runProcess.on('error', (err) => {
+      console.error(`Failed to start setup process: ${err}`);
+    });
+
     return 'Started';
   } catch (err) {
     console.error('Error starting Python script:', err);
