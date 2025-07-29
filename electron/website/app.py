@@ -83,6 +83,18 @@ async def loadapplication(request: Request):
     content = await render_template("app.html", {"request": request})
     return HTMLResponse(content=content)
 
+@app.get("/static/icons/{file}")
+async def staticicons(request: Request, file: str):
+    filepath = f"static/icons/{file}"
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    with open(filepath, "rb") as f:
+        content = f.read()
+    
+    return Response(content, media_type="image/svg+xml")
+    
+
 
 if __name__ == "__main__":
     import os

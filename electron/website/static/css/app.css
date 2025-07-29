@@ -14,3 +14,130 @@ body {
     background: #13101d;
     color: #f5f5f5;
 }
+
+hr {
+    width: 100%;
+    margin: 0;
+    border: 0.5px solid #34303d;
+    border-radius: 0.5rem;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3rem;
+    padding: 0.75rem;
+    background: #24202daa;
+}
+
+nav div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+nav .essential img {
+    height: 1.25rem;
+    width: 1.25rem;
+    padding: 0.75rem;
+    background: #24202d;
+    border: none;
+    border-radius: 0.75rem;
+    transition: 0.2s;
+}
+
+nav .essential img:hover {
+    background: #98d9ffaa;
+}
+
+.messages {
+    position: fixed;
+    top: 0;
+    left: 4.5rem;
+    right: 0;
+    bottom: 0;
+    background: #24202daa;
+}
+
+.messages-container {
+    position: relative;
+    height: calc(100% - 1rem);
+    width: calc(100% - 0.5rem);
+    margin: 0.5rem 0;
+    margin-right: 0.5rem;
+    border: 1px solid #34303d;
+    border-radius: 1rem;
+}
+
+.messages-top-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2rem;
+    padding: 0.25rem;
+    border-bottom: 1px solid #34303d;
+}
+
+.messages-side-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 12rem;
+    padding: 0.25rem;
+    padding-top: 2.75rem;
+    border-right: 1px solid #34303d;
+}
+
+.mbtn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+    width: calc(100% - 1rem);
+    padding: 0.5rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 0.5rem;
+    opacity: 0.8;
+    transition: 0.2s;
+}
+
+.mbtn:hover {
+    background: #34303d50;
+    opacity: 1;
+}
+
+.messages-display {
+    position: absolute;
+    top: 2.75rem;
+    left: 12.5rem;
+    right: 0;
+    bottom: 0;
+}
+
+.messages-input {
+    position: absolute;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    right: 0.25rem;
+    height: 3rem;
+    background: #24202d;
+    border: 1px solid #34303daa;
+    border-radius: 0.75rem;
+    transition: 0.2s;
+}
+
+.messages-input:hover {
+    border: 1px solid #34303d;
+    background: #34303d50;
+}

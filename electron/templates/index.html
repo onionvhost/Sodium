@@ -116,6 +116,7 @@
   <script>
     let status = false;
     let trafficPollInterval = null;
+    let statsPollInterval = null;
 
     function show(id) {
       document.getElementById(id).style.display = 'flex';
@@ -182,7 +183,13 @@
       }
       try {
         const res = await fetch('http://127.0.0.1:8081/load');
-        if (res.ok) {data = await res.json();};
+        if (res.ok) {
+          const json = await res.json();
+          data = json.stats || {};
+          if (statsPollInterval === null) {
+            statsPollInterval = setInterval(async () => {await waitForWebsite()}, 10000);
+          }
+        };
       } catch (err) {
         // API not ready yet
       }
@@ -194,7 +201,7 @@
       document.getElementById('visitors-title').textContent = data.visitors || 0;
 
       return JSON.stringify({"online": status, "users": data.users, "messages": data.messages, "visitors": data.visitors});
-    };
+    }
 
     window.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -432,7 +439,7 @@
               display: false
             },
             suggestedMin: 5,
-            suggestedMax: 1000
+            suggestedMax: 100000
           }
         }
       }
@@ -481,7 +488,7 @@
               display: false
             },
             suggestedMin: 5,
-            suggestedMax: 1000
+            suggestedMax: 100000
           }
         }
       }
